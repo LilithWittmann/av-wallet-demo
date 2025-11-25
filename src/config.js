@@ -4,7 +4,8 @@ const getRedirectUri = () => {
   }
   
   if (typeof window !== 'undefined') {
-    return `${window.location.origin}/callback`;
+    const base = import.meta.env.BASE_URL || '/';
+    return `${window.location.origin}${base}callback`;
   }
   
   return 'https://credentials.dev';

@@ -10,7 +10,8 @@ function App() {
   const [isGettingCredential, setIsGettingCredential] = useState(false);
 
   // Check if this is a callback URL
-  const isCallback = window.location.pathname === '/callback';
+  const basePath = import.meta.env.BASE_URL || '/';
+  const isCallback = window.location.pathname === `${basePath}callback` || window.location.pathname.endsWith('/callback');
 
   useEffect(() => {
     const stored = localStorage.getItem('av-credentials');
