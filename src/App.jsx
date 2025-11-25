@@ -11,7 +11,13 @@ function App() {
 
   // Check if this is a callback URL
   const basePath = import.meta.env.BASE_URL || '/';
-  const isCallback = window.location.pathname === `${basePath}callback` || window.location.pathname.endsWith('/callback');
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectPath = urlParams.get('redirect');
+  
+  // Handle GitHub Pages SPA routing
+  const isCallback = redirectPath?.includes('callback') || 
+                     window.location.pathname === `${basePath}callback` || 
+                     window.location.pathname.endsWith('/callback');
 
   useEffect(() => {
     const stored = localStorage.getItem('av-credentials');
@@ -63,7 +69,12 @@ function App() {
 
   // If this is a callback, render the callback handler
   if (isCallback) {
-    return <CallbackHandler />;
+    // Extract query params from redirect if present
+    let callbackParams = window.location.search;
+    if (redirectPath && redirectPath.includes('?')) {
+      callbackParams = '?' + redirectPath.split('?')[1];
+    }
+    return <CallbackHandler queryString={callbackParams} />;
   }
 
   return (

@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 
-export default function CallbackHandler() {
+export default function CallbackHandler({ queryString }) {
   useEffect(() => {
     console.log('[CallbackHandler] Starting callback processing');
     console.log('[CallbackHandler] window.opener:', window.opener);
+    console.log('[CallbackHandler] queryString:', queryString);
     
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(queryString || window.location.search);
     const code = params.get('code');
     const error = params.get('error');
 
@@ -51,7 +52,7 @@ export default function CallbackHandler() {
         window.location.href = window.location.origin + basePath;
       }
     }
-  }, []);
+  }, [queryString]);
 
   return (
     <div style={{

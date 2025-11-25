@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+      // Redirect to index.html with the path and query preserved
+      const path = window.location.pathname.replace('/av-wallet-demo/', '');
+      const redirect = '/av-wallet-demo/' + (path ? '?redirect=' + encodeURIComponent(path + window.location.search) : '');
+      window.location.replace(redirect);
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+</html>
