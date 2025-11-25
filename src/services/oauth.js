@@ -57,6 +57,16 @@ async function authorize(requestUri) {
   authUrl.searchParams.append('request_uri', requestUri);
   authUrl.searchParams.append('redirect_uri', config.oauth.redirectUri);
 
+  // On mobile, use redirect flow instead of popup
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // Store state to resume after redirect
+    sessionStorage.setItem('oauth-in-progress', 'true');
+    window.location.href = authUrl.toString();
+    return new Promise(() => {}); // Will be resolved after redirect back
+  }
+
   return new Promise((resolve, reject) => {
     const width = 500;
     const height = 600;
@@ -174,3 +184,6 @@ async function getCredential(accessToken) {
 
   return await response.json();
 }
+
+export { exchangeCodeForTokens, getCredential };
+

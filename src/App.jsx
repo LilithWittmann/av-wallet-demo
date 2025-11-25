@@ -22,6 +22,19 @@ function App() {
         console.error('Failed to parse credentials', e);
       }
     }
+
+    // Check if returning from OAuth on mobile
+    const oauthCode = sessionStorage.getItem('oauth-code');
+    const oauthError = sessionStorage.getItem('oauth-error');
+    
+    console.log('[App] oauth-code:', oauthCode ? 'present' : 'missing');
+    console.log('[App] oauth-error:', oauthError);
+    
+    if (oauthCode || oauthError) {
+      console.log('[App] OAuth completed, navigating to credential-manager');
+      setIsGettingCredential(true);
+      setStep('credential-manager');
+    }
   }, []);
 
   useEffect(() => {

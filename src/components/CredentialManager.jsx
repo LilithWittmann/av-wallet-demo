@@ -1,15 +1,62 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAgeVerificationCredential } from '../services/oauth.js';
 
 export default function CredentialManager({ credentials, onAddCredential, onError, onScan, autoStart = false }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
-    if (autoStart) {
+    if (hasProcessedRef.current) return;
+    
+    // Check for OAuth code from mobile redirect
+    const code = sessionStorage.getItem('oauth-code');
+    const oauthError = sessionStorage.getItem('oauth-error');
+    
+    console.log('[CredentialManager] useEffect - code:', code ? 'present' : 'missing');
+    console.log('[CredentialManager] useEffect - error:', oauthError);
+    console.log('[CredentialManager] useEffect - autoStart:', autoStart);
+    
+    if (code) {
+      console.log('[CredentialManager] Processing OAuth code from mobile redirect');
+      hasProcessedRef.current = true;
+      sessionStorage.removeItem('oauth-code');
+      handleOAuthCode(code);
+    } else if (oauthError) {
+      sessionStorage.removeItem('oauth-error');
+      setError(`Authorization failed: ${oauthError}`);
+    } else if (autoStart) {
+      console.log('[CredentialManager] Auto-starting credential request');
+      hasProcessedRef.current = true;
       handleGetCredential();
     }
-  }, [autoStart]);
+  }, []);
+
+  const handleOAuthCode = async (code) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { exchangeCodeForTokens, getCredential } = await import('../services/oauth.js');
+      const tokens = await exchangeCodeForTokens(code);
+      const credentialResponse = await getCredential(tokens.access_token);
+      
+      const credential = {
+        credential: credentialResponse.credentials[0].credential,
+        notification_id: credentialResponse.notification_id,
+        timestamp: Date.now()
+      };
+      
+      onAddCredential(credential);
+    } catch (err) {
+      setError(err.message);
+      if (onError) {
+        onError();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGetCredential = async () => {
     setLoading(true);
